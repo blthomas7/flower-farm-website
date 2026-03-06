@@ -1,12 +1,183 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 3001;
+const JWT_SECRET = 'your-secret-key-change-in-production'; // TODO: Move to environment variable
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// ============================================
+// MOCK USER STORAGE (Phase 5 will use database)
+// ============================================
+const users = [
+  {
+    id: 1,
+    email: 'demo@farm.com',
+    name: 'Demo User',
+    passwordHash: '$2b$10$YourHashedPasswordHere', // Will be replaced with real hash
+    role: 'customer',
+    createdAt: new Date()
+  }
+];
+
+// Initialize demo user with proper hash
+(async () => {
+  const hashedPassword = await bcrypt.hash('demo123456', 10);
+  users[0].passwordHash = hashedPassword;
+})();
+
+// ============================================
+// AUTHENTICATION MIDDLEWARE
+// ============================================
+
+// Verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// ============================================
+// AUTHENTICATION ENDPOINTS
+// ============================================
+
+// POST /api/auth/register - Register new user
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    // Check if user already exists
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
+      return res.status(409).json({ error: 'Email already registered' });
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const newUser = {
+      id: users.length + 1,
+      name,
+      email,
+      passwordHash,
+      role: 'customer',
+      createdAt: new Date()
+    };
+
+    users.push(newUser);
+
+    // Create JWT token
+    const token = jwt.sign(
+      { id: newUser.id, email: newUser.email, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully',
+      token,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+// POST /api/auth/login - Login user
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Find user
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// GET /api/auth/verify - Verify token and get user info
+app.get('/api/auth/verify', verifyToken, (req, res) => {
+  const user = users.find(u => u.id === req.user.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }
+  });
+});
 
 // ============================================
 // MOCK DATA
@@ -331,11 +502,20 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🌸 Flower Farm Backend running on port ${PORT}`);
   console.log(`Visit http://localhost:${PORT}/health to verify`);
-  console.log('\nAvailable endpoints:');
+  console.log('\n========================================');
+  console.log('AUTHENTICATION ENDPOINTS:');
+  console.log('  POST http://localhost:3001/api/auth/register');
+  console.log('  POST http://localhost:3001/api/auth/login');
+  console.log('  GET  http://localhost:3001/api/auth/verify (protected)');
+  console.log('\nDEMO CREDENTIALS:');
+  console.log('  Email:    demo@farm.com');
+  console.log('  Password: demo123456');
+  console.log('\nPUBLIC API ENDPOINTS:');
   console.log('  GET http://localhost:3001/api/products');
   console.log('  GET http://localhost:3001/api/products/:id');
   console.log('  GET http://localhost:3001/api/csa-options');
   console.log('  GET http://localhost:3001/api/planting-calendar');
   console.log('  GET http://localhost:3001/api/farm/location');
   console.log('  GET http://localhost:3001/api/blog/posts');
+  console.log('========================================\n');
 });

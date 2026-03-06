@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Blossom Farm</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-container h1 {
+            text-align: center;
+            color: #8B5BA1;
+            margin-bottom: 10px;
+        }
+
+        .auth-container p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8B5BA1;
+            box-shadow: 0 0 5px rgba(139, 91, 161, 0.3);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #8B5BA1, #E75480);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .auth-link a {
+            color: #8B5BA1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">🌸 Blossom Farm</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="csa.html">CSA</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <h1>🌸 Create Account</h1>
+        <p>Join our farm community to order flowers and subscribe to CSA boxes</p>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    placeholder="Your Full Name" 
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="your@email.com" 
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="At least 8 characters" 
+                    required
+                    minlength="8"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    placeholder="Confirm your password" 
+                    required
+                    minlength="8"
+                >
+            </div>
+
+            <button type="submit" class="auth-button" id="submitBtn">Create Account</button>
+        </form>
+
+        <div class="auth-link">
+            Already have an account? <a href="login.html">Log in here</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Blossom Farm. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Clear previous messages
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 8) {
+                errorDiv.textContent = 'Password must be at least 8 characters';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating account...';
+
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+
+                // Success!
+                successDiv.textContent = '✓ Account created! Redirecting to login...';
+                successDiv.style.display = 'block';
+                
+                // Store token if provided
+                if (data.token) {
+                    localStorage.setItem('authToken', data.token);
+                }
+
+                // Redirect to login or account page
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
