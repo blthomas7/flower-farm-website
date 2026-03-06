@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { sendWelcomeEmail, sendCSASubscriptionEmail, sendOrderConfirmationEmail, sendCSAWeeklyBoxEmail } = require('./emailService');
 
 const app = express();
 const PORT = 3001;
@@ -114,6 +115,11 @@ app.post('/api/auth/register', async (req, res) => {
     };
 
     users.push(newUser);
+
+    // Send welcome email (fire and forget to not block response)
+    sendWelcomeEmail(newUser.name, newUser.email).catch(err => {
+      console.error('Failed to send welcome email:', err);
+    });
 
     // Create JWT token
     const token = jwt.sign(
@@ -546,6 +552,16 @@ app.post('/api/csa-subscribe', verifyToken, async (req, res) => {
 
     csaMemberships.push(membership);
 
+    // Send CSA subscription email (fire and forget)
+    const currentUser = users.find(u => u.id === req.user.id);
+    if (currentUser) {
+      const csaOption = csaOptions.find(opt => opt.name === tier);
+      const tierValue = csaOption?.price || 60;
+      sendCSASubscriptionEmail(currentUser.name, currentUser.email, tier, frequency, pickupLocation, tierValue).catch(err => {
+        console.error('Failed to send CSA email:', err);
+      });
+    }
+
     // In production, this would charge Stripe here
     // For now, just create the membership
     res.status(201).json({
@@ -590,6 +606,29 @@ app.post('/api/orders', verifyToken, async (req, res) => {
     };
 
     orders.push(order);
+
+    // Send order confirmation email (fire and forget)
+    const currentUser = users.find(u => u.id === req.user.id);
+    if (currentUser) {
+      const itemDetails = items.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return {
+          name: product?.name || `Product #${item.productId}`,
+          quantity: item.quantity
+        };
+      });
+      sendOrderConfirmationEmail(
+        currentUser.name,
+        currentUser.email,
+        order.id,
+        itemDetails,
+        totalPrice,
+        orderType || 'retail',
+        pickupLocation
+      ).catch(err => {
+        console.error('Failed to send order confirmation email:', err);
+      });
+    }
 
     res.status(201).json({
       success: true,
