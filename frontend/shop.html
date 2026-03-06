@@ -28,46 +28,10 @@
         <p>Browse our selection of fresh, beautiful flowers</p>
     </header>
 
-    <section class="shop-section">
+    <section class="shop-section" id="shop-section">
         <h2>Available Flowers</h2>
-        <div class="flower-grid">
-            <div class="flower-card">
-                <h3>Roses</h3>
-                <p>Classic beauty in red, pink, and white</p>
-                <p class="price">$25 per bunch (12 stems)</p>
-                <button>Add to Cart</button>
-            </div>
-            <div class="flower-card">
-                <h3>Dahlias</h3>
-                <p>Stunning blooms in multiple colors</p>
-                <p class="price">$20 per bunch (8 stems)</p>
-                <button>Add to Cart</button>
-            </div>
-            <div class="flower-card">
-                <h3>Sunflowers</h3>
-                <p>Bright and cheerful yellow sunflowers</p>
-                <p class="price">$18 per bunch (6 stems)</p>
-                <button>Add to Cart</button>
-            </div>
-            <div class="flower-card">
-                <h3>Tulips</h3>
-                <p>Spring favorites in assorted colors</p>
-                <p class="price">$22 per bunch (10 stems)</p>
-                <button>Add to Cart</button>
-            </div>
-            <div class="flower-card">
-                <h3>Lavender</h3>
-                <p>Fragrant and beautiful purple blooms</p>
-                <p class="price">$15 per bunch (5 stems)</p>
-                <button>Add to Cart</button>
-            </div>
-            <div class="flower-card">
-                <h3>Mixed Bouquet</h3>
-                <p>Our florist's choice seasonal mix</p>
-                <p class="price">$35 for premium arrangement</p>
-                <button>Add to Cart</button>
-            </div>
-        </div>
+        <p id="loading" style="text-align: center; color: #888;">Loading products...</p>
+        <div class="flower-grid" id="flower-grid"></div>
     </section>
 
     <section class="cart-section">
@@ -78,5 +42,59 @@
     <footer>
         <p>&copy; 2026 Blossom Farm. All rights reserved.</p>
     </footer>
+
+    <script>
+        // Fetch products from backend API
+        async function loadProducts() {
+            try {
+                const response = await fetch('http://localhost:3001/api/products');
+                const result = await response.json();
+                const products = result.data;
+
+                // Hide loading message
+                document.getElementById('loading').style.display = 'none';
+
+                // Create product cards
+                const flowerGrid = document.getElementById('flower-grid');
+                flowerGrid.innerHTML = ''; // Clear any existing content
+
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'flower-card';
+                    
+                    // Calculate price display
+                    const pricePerStem = product.price;
+                    const stemCount = product.type === 'bundle' ? '1' : '12 stems';
+                    const displayPrice = product.type === 'bundle' 
+                        ? `$${product.price.toFixed(2)} (Bundle)` 
+                        : `$${(pricePerStem * 12).toFixed(2)} per 12-stem bunch`;
+
+                    card.innerHTML = `
+                        <h3>${product.name}</h3>
+                        <p style="color: #666; font-size: 0.9em;">Color: ${product.color}</p>
+                        <p>${product.description}</p>
+                        <p style="color: #888; font-size: 0.85em;">Vase Life: ${product.vaseLife} days</p>
+                        <p style="color: green; font-size: 0.9em;">✓ In Stock (${product.inStockQty} units)</p>
+                        <p class="price">${displayPrice}</p>
+                        <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+                    `;
+                    flowerGrid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('loading').innerHTML = 
+                    '<p style="color: red;">Error loading products. Is the backend running on port 3001?</p>';
+            }
+        }
+
+        // Add to cart function (placeholder for now)
+        function addToCart(productName, price) {
+            alert(`Added "${productName}" to cart ($${price.toFixed(2)})`);
+            // Cart functionality will be added in later phases
+        }
+
+        // Load products when page loads
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
 </body>
 </html>
