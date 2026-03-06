@@ -250,17 +250,20 @@
                 }
 
                 // Success!
-                successDiv.textContent = '✓ Account created! Redirecting to login...';
+                successDiv.textContent = '✓ Account created! Redirecting to your account...';
                 successDiv.style.display = 'block';
                 
-                // Store token if provided
-                if (data.token) {
+                // Store token and user info (auto-login after signup)
+                if (data.token && data.user) {
                     localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('userName', data.user.name);
+                    localStorage.setItem('userEmail', data.user.email);
                 }
 
-                // Redirect to login or account page
+                // Redirect to account page
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = 'account.html';
                 }, 2000);
 
             } catch (error) {

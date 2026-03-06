@@ -261,14 +261,15 @@
                 successDiv.textContent = '✓ Login successful! Redirecting...';
                 successDiv.style.display = 'block';
                 
-                // Store token
+                // Store token and user info
                 localStorage.setItem('authToken', data.token);
-                localStorage.setItem('userRole', data.role);
-                localStorage.setItem('userName', data.name);
+                localStorage.setItem('userRole', data.user.role);
+                localStorage.setItem('userName', data.user.name);
+                localStorage.setItem('userEmail', data.user.email);
 
                 // Redirect to appropriate page
                 setTimeout(() => {
-                    if (data.role === 'admin') {
+                    if (data.user.role === 'admin') {
                         window.location.href = 'admin-dashboard.html';
                     } else {
                         window.location.href = 'account.html';

@@ -29,6 +29,17 @@ const users = [
 (async () => {
   const hashedPassword = await bcrypt.hash('demo123456', 10);
   users[0].passwordHash = hashedPassword;
+  
+  // Add admin demo user
+  const adminHash = await bcrypt.hash('admin123456', 10);
+  users.push({
+    id: 2,
+    email: 'admin@farm.com',
+    name: 'Admin User',
+    passwordHash: adminHash,
+    role: 'admin',
+    createdAt: new Date()
+  });
 })();
 
 // ============================================
@@ -50,6 +61,19 @@ const verifyToken = (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ error: 'Invalid token' });
   }
+};
+
+// Verify admin role
+const verifyAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+
+  next();
 };
 
 // ============================================
@@ -424,6 +448,12 @@ const blogPosts = [
   }
 ];
 
+// Mock orders
+const orders = [];
+
+// Mock CSA memberships
+const csaMemberships = [];
+
 // ============================================
 // API ENDPOINTS
 // ============================================
@@ -490,6 +520,145 @@ app.get('/api/blog/posts', (req, res) => {
   });
 });
 
+// ============================================
+// CUSTOMER ORDER ENDPOINTS
+// ============================================
+
+// POST /api/csa-subscribe - Subscribe to CSA
+app.post('/api/csa-subscribe', verifyToken, async (req, res) => {
+  try {
+    const { tier, frequency, pickupLocation } = req.body;
+
+    if (!tier || !frequency || !pickupLocation) {
+      return res.status(400).json({ error: 'Tier, frequency, and pickup location required' });
+    }
+
+    const membership = {
+      id: csaMemberships.length + 1,
+      userId: req.user.id,
+      tier,
+      frequency,
+      pickupLocation,
+      startDate: new Date(),
+      status: 'active',
+      createdAt: new Date()
+    };
+
+    csaMemberships.push(membership);
+
+    // In production, this would charge Stripe here
+    // For now, just create the membership
+    res.status(201).json({
+      success: true,
+      message: 'Successfully subscribed to CSA!',
+      membership
+    });
+  } catch (error) {
+    console.error('CSA subscription error:', error);
+    res.status(500).json({ error: 'Subscription failed' });
+  }
+});
+
+// POST /api/orders - Create new order
+app.post('/api/orders', verifyToken, async (req, res) => {
+  try {
+    const { items, orderType, pickupLocation } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: 'Order must contain items' });
+    }
+
+    // Calculate total price
+    let totalPrice = 0;
+    items.forEach(item => {
+      const product = products.find(p => p.id === item.productId);
+      if (product) {
+        totalPrice += product.price * item.quantity;
+      }
+    });
+
+    const order = {
+      id: orders.length + 1,
+      userId: req.user.id,
+      items,
+      orderType: orderType || 'retail',
+      totalPrice,
+      pickupLocation,
+      status: 'pending',
+      orderDate: new Date(),
+      createdAt: new Date()
+    };
+
+    orders.push(order);
+
+    res.status(201).json({
+      success: true,
+      message: 'Order created successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).json({ error: 'Order creation failed' });
+  }
+});
+
+// GET /api/user/csa - Get user's CSA memberships
+app.get('/api/user/csa', verifyToken, (req, res) => {
+  const userMemberships = csaMemberships.filter(m => m.userId === req.user.id);
+  
+  res.json({
+    success: true,
+    data: userMemberships,
+    count: userMemberships.length
+  });
+});
+
+// GET /api/user/orders - Get user's orders
+app.get('/api/user/orders', verifyToken, (req, res) => {
+  const userOrders = orders.filter(o => o.userId === req.user.id);
+  
+  res.json({
+    success: true,
+    data: userOrders,
+    count: userOrders.length
+  });
+});
+
+// ============================================
+// ADMIN ENDPOINTS (Protected)
+// ============================================
+
+// GET /api/admin/orders - Get all orders (admin only)
+app.get('/api/admin/orders', verifyToken, verifyAdmin, (req, res) => {
+  res.json({
+    success: true,
+    data: orders,
+    count: orders.length
+  });
+});
+
+// GET /api/admin/users - Get all users (admin only)
+app.get('/api/admin/users', verifyToken, verifyAdmin, (req, res) => {
+  // Don't return passwords
+  const safeUsers = users.map(u => ({
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    role: u.role,
+    createdAt: u.createdAt
+  }));
+
+  res.json({
+    success: true,
+    data: safeUsers,
+    count: safeUsers.length
+  });
+});
+
+// ============================================
+// HEALTH CHECK
+// ============================================
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'Backend server is running!' });
@@ -507,9 +676,12 @@ app.listen(PORT, () => {
   console.log('  POST http://localhost:3001/api/auth/register');
   console.log('  POST http://localhost:3001/api/auth/login');
   console.log('  GET  http://localhost:3001/api/auth/verify (protected)');
-  console.log('\nDEMO CREDENTIALS:');
+  console.log('\nDEMO CUSTOMER CREDENTIALS:');
   console.log('  Email:    demo@farm.com');
   console.log('  Password: demo123456');
+  console.log('\nDEMO ADMIN CREDENTIALS:');
+  console.log('  Email:    admin@farm.com');
+  console.log('  Password: admin123456');
   console.log('\nPUBLIC API ENDPOINTS:');
   console.log('  GET http://localhost:3001/api/products');
   console.log('  GET http://localhost:3001/api/products/:id');
@@ -517,5 +689,13 @@ app.listen(PORT, () => {
   console.log('  GET http://localhost:3001/api/planting-calendar');
   console.log('  GET http://localhost:3001/api/farm/location');
   console.log('  GET http://localhost:3001/api/blog/posts');
+  console.log('\nCUSTOMER ENDPOINTS (protected):');
+  console.log('  POST http://localhost:3001/api/csa-subscribe');
+  console.log('  POST http://localhost:3001/api/orders');
+  console.log('  GET  http://localhost:3001/api/user/csa');
+  console.log('  GET  http://localhost:3001/api/user/orders');
+  console.log('\nADMIN ENDPOINTS (protected, admin-only):');
+  console.log('  GET  http://localhost:3001/api/admin/orders');
+  console.log('  GET  http://localhost:3001/api/admin/users');
   console.log('========================================\n');
 });
