@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Orders - Blossom Farm</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">🌸 Blossom Farm</a>
+            <ul class="nav-menu">
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="csa.html">CSA</a></li>
+                <li><a href="buckets.html">Buckets</a></li>
+                <li><a href="calendar.html">Calendar</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="account.html">Account</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="admin-dashboard.html">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <h1>📋 Order Management</h1>
+        <p>View, filter, and manage all customer orders</p>
+    </header>
+
+    <section class="admin-login" id="admin-login">
+        <h2>Admin Access Required</h2>
+        <p>Please log in with your admin credentials</p>
+        <form>
+            <div class="form-group">
+                <label for="admin-email">Email:</label>
+                <input type="email" id="admin-email" required>
+            </div>
+            <div class="form-group">
+                <label for="admin-password">Password:</label>
+                <input type="password" id="admin-password" required>
+            </div>
+            <button type="submit" class="submit-btn">Sign In as Admin</button>
+        </form>
+    </section>
+
+    <section class="admin-orders" id="admin-orders" style="display: none;">
+        <div class="admin-controls">
+            <h2>All Orders</h2>
+            <div class="filter-controls">
+                <select>
+                    <option>All Order Types</option>
+                    <option>CSA</option>
+                    <option>Retail</option>
+                    <option>Bulk/Wholesale</option>
+                </select>
+                <select>
+                    <option>All Statuses</option>
+                    <option>Pending</option>
+                    <option>In Preparation</option>
+                    <option>Ready for Pickup</option>
+                    <option>Completed</option>
+                </select>
+                <input type="search" placeholder="Search by order ID or customer...">
+            </div>
+        </div>
+
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Type</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Pickup Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>#1001</td>
+                    <td>Jane Smith</td>
+                    <td>Bulk</td>
+                    <td>50 Roses</td>
+                    <td>$95</td>
+                    <td><span class="status-badge ready">Ready</span></td>
+                    <td>March 5</td>
+                    <td>March 7</td>
+                    <td><button>Details</button></td>
+                </tr>
+                <tr>
+                    <td>#1002</td>
+                    <td>John Doe</td>
+                    <td>CSA</td>
+                    <td>Medium Box</td>
+                    <td>$100</td>
+                    <td><span class="status-badge pending">Pending</span></td>
+                    <td>March 4</td>
+                    <td>March 12 (Wed)</td>
+                    <td><button>Details</button></td>
+                </tr>
+                <tr>
+                    <td>#1003</td>
+                    <td>Wedding Planner Inc</td>
+                    <td>Bulk</td>
+                    <td>Wedding Mix</td>
+                    <td>$500</td>
+                    <td><span class="status-badge in-prep">In Prep</span></td>
+                    <td>March 3</td>
+                    <td>March 10</td>
+                    <td><button>Details</button></td>
+                </tr>
+                <tr>
+                    <td>#1000</td>
+                    <td>Sarah Johnson</td>
+                    <td>Retail</td>
+                    <td>Mixed Bouquet</td>
+                    <td>$35</td>
+                    <td><span class="status-badge completed">Completed</span></td>
+                    <td>March 2</td>
+                    <td>March 3</td>
+                    <td><button>Details</button></td>
+                </tr>
+                <tr>
+                    <td>#999</td>
+                    <td>Local Florist</td>
+                    <td>Wholesale</td>
+                    <td>100 Stems Mix</td>
+                    <td>$180</td>
+                    <td><span class="status-badge completed">Completed</span></td>
+                    <td>Feb 28</td>
+                    <td>March 1</td>
+                    <td><button>Details</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="order-stats" id="order-stats" style="display: none;">
+        <h2>Order Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Total Orders (March)</h3>
+                <p class="big-number">42</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Revenue (March)</h3>
+                <p class="big-number">$3,250</p>
+            </div>
+            <div class="stat-box">
+                <h3>Average Order Value</h3>
+                <p class="big-number">$77.38</p>
+            </div>
+            <div class="stat-box">
+                <h3>Pending Orders</h3>
+                <p class="big-number">5</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Blossom Farm. All rights reserved.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Blossom Farm</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">🌸 Blossom Farm</a>
+            <ul class="nav-menu">
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="csa.html">CSA</a></li>
+                <li><a href="buckets.html">Buckets</a></li>
+                <li><a href="calendar.html">Calendar</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="account.html">Account</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="admin-dashboard.html">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <h1>👤 My Account</h1>
+        <p>Manage your profile, orders, and CSA membership</p>
+    </header>
+
+    <section class="login-section">
+        <div class="login-container">
+            <h2>Login to Your Account</h2>
+            <form>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign In</button>
+            </form>
+            <p>Don't have an account? <a href="#">Create one now</a></p>
+        </div>
+    </section>
+
+    <section class="account-features">
+        <h2>Account Features</h2>
+        <div class="feature-grid">
+            <div class="feature-box">
+                <h3>📋 Order History</h3>
+                <p>View all your past orders and track current shipments</p>
+            </div>
+            <div class="feature-box">
+                <h3>🥗 CSA Membership</h3>
+                <p>Manage your CSA subscription, preferences, and pickup location</p>
+            </div>
+            <div class="feature-box">
+                <h3>💳 Payment Methods</h3>
+                <p>Add or update credit cards and billing information</p>
+            </div>
+            <div class="feature-box">
+                <h3>⚙️ Settings</h3>
+                <p>Update your profile information and notification preferences</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="authenticated-section" style="display: none;">
+        <h2>Welcome Back!</h2>
+        <div class="account-dashboard">
+            <div class="dashboard-card">
+                <h3>Your CSA Membership</h3>
+                <p><strong>Status:</strong> Active</p>
+                <p><strong>Next Pickup:</strong> Wednesday, March 12 at 4 PM</p>
+                <button>Manage CSA</button>
+            </div>
+            <div class="dashboard-card">
+                <h3>Recent Orders</h3>
+                <p>Loading your orders...</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>Saved Preferences</h3>
+                <p>Preferred flowers, pickup location, and notification settings</p>
+                <button>Edit Preferences</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Blossom Farm. All rights reserved.</p>
+    </footer>
+</body>
+</html>
